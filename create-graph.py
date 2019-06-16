@@ -2,6 +2,7 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 import tweepy
+import pickle
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -9,6 +10,23 @@ CONSUMER_KEY = os.environ.get('CONSUMER_KEY')
 CONSUMER_SECRET = os.environ.get('CONSUMER_SECRET')
 ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.environ.get('ACCESS_TOKEN_SECRET')
+
+
+def get_retweeters(api, tweet_id, pickle_path):
+    if os.path.exists(pickle_path):
+        with open(pickle_path, 'rb') as f:
+            retweeters = pickle.load(f)
+    else:
+        retweeters = api.retweeters(tweet_id)
+        with open(pickle_path, 'wb') as f:
+            pickle.dump(retweeters, f)
+    return retweeters
+
+
+
+
+
+
 
 
 def create_graph(tweet_id):
