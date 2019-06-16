@@ -3,7 +3,6 @@ from os.path import join, dirname
 import csv
 from dotenv import load_dotenv
 import tweepy
-import pickle
 from tweet_graph import get_retweeters, get_friends, get_followers, compare_groups
 
 dotenv_path = join(dirname(__file__), '.env')

@@ -37,7 +37,7 @@ def get_retweeters(api, tweet_id, retweeters_id_pickle, retweeters_pickle):
     return retweeters
 
 
-def get_friends(api, user_id, friends_pickle):
+def get_friends(api, user_id, friends_id_pickle, friends_pickle):
     """
     get friend of a user
     :param api:
@@ -45,17 +45,29 @@ def get_friends(api, user_id, friends_pickle):
     :param friends_pickle:
     :return:
     """
+    if os.path.exists(friends_id_pickle):
+        with open(friends_id_pickle, 'rb') as f:
+            friends_id = pickle.load(f)
+    else:
+        friends_id = api.friends_ids(user_id)
+        with open(friends_id_pickle, 'wb') as f:
+            pickle.dump(friends_id, f)
+
     if os.path.exists(friends_pickle):
         with open(friends_pickle, 'rb') as f:
             friends = pickle.load(f)
     else:
-        friends = api.friends(user_id)
+        friends = []
+        for fid in tqdm(friends_id):
+            friends.append(api.get_user(fid))
+            sleep(60)
         with open(friends_pickle, 'wb') as f:
             pickle.dump(friends, f)
+
     return friends
 
 
-def get_followers(api, user_id, followers_picke):
+def get_followers(api, user_id, followers_id_pickle, followers_pickle):
     """
     get followers of a user
     :param api:
@@ -63,13 +75,25 @@ def get_followers(api, user_id, followers_picke):
     :param followers_picke:
     :return:
     """
-    if os.path.exists(followers_picke):
-        with open(followers_picke, 'rb') as f:
+    if os.path.exists(followers_id_pickle):
+        with open(followers_id_pickle, 'rb') as f:
+            followers_id = pickle.load(f)
+    else:
+        followers_id = api.followers_ids(user_id)
+        with open(followers_id_pickle, 'wb') as f:
+            pickle.dump(followers_id, f)
+
+    if os.path.exists(followers_pickle):
+        with open(followers_pickle, 'rb') as f:
             followers = pickle.load(f)
     else:
-        followers = api.friends(user_id)
-        with open(followers_picke, 'wb') as f:
+        followers = []
+        for fid in tqdm(followers_id):
+            followers.append(api.get_user(fid))
+            sleep(60)
+        with open(followers_pickle, 'wb') as f:
             pickle.dump(followers, f)
+
     return followers
 
 
@@ -77,7 +101,6 @@ def create_word_cloud(text, file, color='white',
                       font_path='/System/Library/Fonts/ヒラギノ明朝 ProN.ttc',
                       width=1024, height=674):
     """
-    ref: https://www.utali.io/entry/2016/10/03/001210
     :param text:
     :param file:
     :param color:
@@ -95,7 +118,6 @@ def create_word_cloud(text, file, color='white',
 
 def compare_groups(groups, files):
     """
-    ref: https://shogo82148.github.io/blog/2015/12/20/mecab-in-python3-final/
     :param groups:
     :return:
     """
