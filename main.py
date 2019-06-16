@@ -1,8 +1,9 @@
 import os
 from os.path import join, dirname
+import pickle
 from dotenv import load_dotenv
 import tweepy
-from create_graph import get_retweeters, get_friends, get_followers
+from tweet_graph import get_retweeters, get_friends, get_followers, compare_groups
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -17,10 +18,18 @@ if __name__ == '__main__':
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
 
+    # 1. 特定のツイートをリツイートしたユーザ情報を取得
     tweet_id = '1134738254496800769'  # tweet id of roy29fuku
     retweeters = get_retweeters(api, tweet_id, 'data/retweeters_id.pickle', 'data/retweeters.pickle')
 
+    # 2. 1のツイート発信者のフォロー（friends）、フォロワー情報を取得
     user_id = '715433541375373312'  # user id of roy29fuku
     friends = get_friends(api, user_id, 'data/friends.pickle')
     followers = get_followers(api, user_id, 'data/followers.pickle')
 
+    # 3. フォロワーの中でリツイートしたユーザとリツイートしなかったユーザを分析
+    followers_rt = [f for f in followers if f in retweeters]
+    followers_not_rt = [f for f in followers if f not in retweeters]
+    groups = [followers_rt, followers_not_rt]
+    files = ['data/followers_rt.png', 'data/followers_not_rt.png']
+    compare_groups(groups, files)

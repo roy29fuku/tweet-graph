@@ -1,8 +1,9 @@
 import os
-import tweepy
 import pickle
 from time import sleep
 from tqdm import tqdm
+from wordcloud import WordCloud
+import MeCab
 
 
 def get_retweeters(api, tweet_id, retweeters_id_pickle, retweeters_pickle):
@@ -72,11 +73,46 @@ def get_followers(api, user_id, followers_picke):
     return followers
 
 
-def create_graph(tweet_id):
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
+def create_word_cloud(text, file, color='white',
+                      font_path='/System/Library/Fonts/ヒラギノ明朝 ProN.ttc',
+                      width=1024, height=674):
+    """
+    ref: https://www.utali.io/entry/2016/10/03/001210
+    :param text:
+    :param file:
+    :param color:
+    :param font_path:
+    :param width:
+    :param height:
+    :return:
+    """
+    wordcloud = WordCloud(background_color=color,
+                          font_path=font_path,
+                          width=width, height=height).generate(text)
+    wordcloud.to_file(file)
+    return
 
+
+def compare_groups(groups, files):
+    """
+    ref: https://shogo82148.github.io/blog/2015/12/20/mecab-in-python3-final/
+    :param groups:
+    :return:
+    """
+    tagger = MeCab.Tagger('')
+    tagger.parse('')
+    for group, file in zip(groups, files):
+        description = ' '.join([user.description for user in group])
+        node = tagger.parseToNode(description)
+        words = []
+        while node:
+            words.append(node.surface)
+            node = node.next
+        create_word_cloud(' '.join(words), file)
+    return
+
+
+def create_graph(api, tweet_id):
     # get retweeters
     retweeter_ids = api.retweeters(tweet_id)
     print('retweeters: {}'.format(len(retweeter_ids)))
