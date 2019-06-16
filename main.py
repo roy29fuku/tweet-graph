@@ -24,8 +24,8 @@ if __name__ == '__main__':
 
     # 2. 1のツイート発信者のフォロー（friends）、フォロワー情報を取得
     user_id = '715433541375373312'  # user id of roy29fuku
-    friends = get_friends(api, user_id, 'data/friends.pickle')
-    followers = get_followers(api, user_id, 'data/followers.pickle')
+    friends = get_friends(api, user_id, 'data/friends_id.pickle', 'data/friends.pickle')
+    followers = get_followers(api, user_id, 'data/followers_id.pickle', 'data/followers.pickle')
 
     # 3. フォロワーの中でリツイートしたユーザとリツイートしなかったユーザを比較分析（どのクラスタに刺さったか）
     # 　　もちろんリツイート後にフォローしたユーザもいる
